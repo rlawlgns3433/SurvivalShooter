@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 
 public class PlayerHealth : LivingEntity
@@ -46,7 +47,7 @@ public class PlayerHealth : LivingEntity
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             Die();
         }
@@ -79,6 +80,12 @@ public class PlayerHealth : LivingEntity
         playerInput.enabled = true;
         playerShooter.enabled = true;
 
-        transform.position = new Vector3(0f, 0f, 0f);
+        Vector3 randomPos = Random.insideUnitSphere * 20f;
+
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(randomPos, out hit, 20f, NavMesh.AllAreas))
+        {
+            transform.position = hit.position;
+        }
     }
 }

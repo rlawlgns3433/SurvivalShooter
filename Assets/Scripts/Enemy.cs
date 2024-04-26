@@ -1,8 +1,6 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public enum EnemyTypes
 {
@@ -41,7 +39,7 @@ public class Enemy : LivingEntity
     public EnemyStatus status = EnemyStatus.Idle;
 
     public float damage = 10f;
-    private float attackInterval = 0.2f;
+    private float attackInterval = 1f;
     private float lastAttackTime;
     private float findTargetRadius = 50f;
     private bool hasTarget
@@ -131,6 +129,18 @@ public class Enemy : LivingEntity
     private void Update()
     {
         enemyAnimator.SetBool("Move", hasTarget);
+
+        switch (status)
+        {
+            case EnemyStatus.Idle:
+                break;
+            case EnemyStatus.Move:
+                break;
+            case EnemyStatus.Attack:
+                break;
+            case EnemyStatus.Death:
+                break;
+        }
     }
 
     IEnumerator UpdatePath()
@@ -180,8 +190,6 @@ public class Enemy : LivingEntity
 
         enemyAnimator.SetTrigger("Die");
         enemyAudioPlayer.PlayOneShot(deathClip);
-        --EnemySpawner.currentEnemyCount;
-        EnemySpawner.usingEnemy.Remove(gameObject);
         GameManager.instance.AddScore((int)(startingHealth + damage));
 
         Invoke("AfterDie", 3f);
@@ -201,13 +209,13 @@ public class Enemy : LivingEntity
         // Code to handle the event
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnCollisionStay(Collision collision)
     {
-        // 공격
-        if (dead)
+        if (!collision.collider.CompareTag("Player"))
             return;
 
-        if (status == EnemyStatus.Attack)
+        // 공격
+        if (dead)
             return;
 
         if (Time.time > lastAttackTime + attackInterval)
@@ -221,14 +229,13 @@ public class Enemy : LivingEntity
                 var hitNormal = pos - collision.contacts[0].point;
                 livingEntity.OnDamage(damage, hitPoint, hitNormal.normalized);
                 lastAttackTime = Time.time;
-                status = EnemyStatus.Attack;
             }
         }
     }
+
     private void AfterDie()
     {
         gameObject.SetActive(false);
-        EnemySpawner.unusingEnemy.Add(gameObject);
-        EnemySpawner.usingEnemy.Remove(gameObject);
+        EnemySpawner.ReturnEnemy(gameObject, type);
     }
 }

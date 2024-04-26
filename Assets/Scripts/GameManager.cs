@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
@@ -25,6 +26,13 @@ public class GameManager : MonoBehaviour
 
     public int Score { get; set; } = 0; // 현재 게임 점수
     public bool isGameover { get; private set; } // 게임 오버 상태
+    public bool isResume { get; private set; }
+
+    //public AudioMixer musicAudioMixer;
+    //public AudioMixer effectAudioMixer;
+
+    public AudioSource bgmPlayer;
+    public AudioClip backgroundMusic;
 
     private void Awake()
     {
@@ -53,13 +61,33 @@ public class GameManager : MonoBehaviour
         }
 
         pos.y += 0.1f;
+
+        //UIManager.instance.musicSlider.onValueChanged.AddListener(SetMusicVolume);
+        //UIManager.instance.effectSlider.onValueChanged.AddListener(SetEffectVolume);
+
+        bgmPlayer.clip = backgroundMusic;
+        bgmPlayer.Play();
     }
 
     private void Update()
     {
+        if (isResume)
+        {
+            AudioSource[] effects = FindObjectsOfType<AudioSource>();
+
+            foreach (var effect in effects)
+            {
+                if (effect == backgroundMusic) continue;
+                effect.volume = UIManager.instance.effectSlider.value;
+            }
+
+            bgmPlayer.volume = UIManager.instance.musicSlider.value;
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Application.Quit();
+            isResume = !UIManager.instance.pauseUI.activeInHierarchy;
+            UIManager.instance.SetActivePauseUI(isResume);
         }
     }
 
@@ -84,4 +112,15 @@ public class GameManager : MonoBehaviour
         // 게임 오버 UI를 활성화
         //UIManager.instance.SetActiveGameoverUI(true);
     }
+
+    //public void SetMusicVolume(float volume)
+    //{
+    //    musicAudioMixer.SetFloat("musicVol", Mathf.Log10(volume) * 20);
+    //}
+    //public void SetEffectVolume(float volume)
+    //{
+    //    effectAudioMixer.SetFloat("Player", Mathf.Log10(volume) * 20);
+    //    effectAudioMixer.SetFloat("Enemies", Mathf.Log10(volume) * 20);
+    //    effectAudioMixer.SetFloat("Gunshots", Mathf.Log10(volume) * 20);
+    //}
 }

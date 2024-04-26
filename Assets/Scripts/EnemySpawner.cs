@@ -7,9 +7,9 @@ public class EnemySpawner : MonoBehaviour
 {
     public List<GameObject> enemyPrefabs = new List<GameObject>();
     public List<GameObject> spawnPoints = new List<GameObject>();
-    public static List<GameObject> usingEnemy = new List<GameObject>();
-    public static List<GameObject> unusingEnemy = new List<GameObject>();
-    WaitForSeconds spawnInterval = new WaitForSeconds(1f);
+    private static Dictionary<EnemyTypes, List<GameObject>> usingEnemy = new Dictionary<EnemyTypes, List<GameObject>>();
+    private static Dictionary<EnemyTypes, List<GameObject>> unusingEnemy = new Dictionary<EnemyTypes, List<GameObject>>();
+    WaitForSeconds spawnInterval = new WaitForSeconds(0.3f);
     Coroutine createEnemyCoroutine = null;
 
     public static int currentEnemyCount = 0;
@@ -19,6 +19,13 @@ public class EnemySpawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
+        for(int i = 0; i < Enemy.TYPE_COUNT; ++i)
+        {
+            usingEnemy[(EnemyTypes)i] = new List<GameObject>();
+            unusingEnemy[(EnemyTypes)i] = new List<GameObject>();
+        }
+
         createEnemyCoroutine = StartCoroutine(CoCreateEnemy());
     }
 
@@ -57,45 +64,46 @@ public class EnemySpawner : MonoBehaviour
             int type = Random.Range(0, Enemy.TYPE_COUNT);
             bool find = false;
             // 타입의 Enemy가 있다면 가져다 쓴다. (SetActive(true);)
-            foreach (var uEnemy in unusingEnemy)
+
+            if(unusingEnemy[(EnemyTypes)type].Count > 0)
             {
-                EnemyTypes eType = uEnemy.GetComponent<Enemy>().type;
-                if ((int)eType == type)
-                {
-                    find = true;
+                var uEnemy = unusingEnemy[(EnemyTypes)type][0];
+                find = true;
 
-                    uEnemy.transform.position = spawnPoint.position;
-                    uEnemy.transform.rotation = spawnPoint.rotation;
+                uEnemy.transform.position = spawnPoint.position;
+                uEnemy.transform.rotation = spawnPoint.rotation;
+                uEnemy.SetActive(true);
 
-                    uEnemy.SetActive(true);
+                usingEnemy[(EnemyTypes)type].Add(uEnemy);
+                unusingEnemy[(EnemyTypes)type].Remove(uEnemy);
 
-                    usingEnemy.Add(uEnemy);
-                    unusingEnemy.Remove(uEnemy);
-
-                    ++spawnedEnemyCount;
-                    ++currentEnemyCount;
-                    break;
-                }
+                ++spawnedEnemyCount;
+                ++currentEnemyCount;
             }
-            // 타입의 Enemy가 없다면 새로 만들어서 쓴다. (Instantiate)
+
             if (find)
             {
                 yield return spawnInterval;
                 continue;
             }
 
+            // 타입의 Enemy가 없다면 새로 만들어서 쓴다. (Instantiate)
             var go = Instantiate(enemyPrefabs[type], spawnPoint.position, spawnPoint.rotation);
-            Enemy enemy = go.GetComponent<Enemy>();
-            enemy.type = (EnemyTypes)type;
-
             if (go != null)
             {
-                usingEnemy.Add(go);
+                usingEnemy[(EnemyTypes)type].Add(go);
                 ++spawnedEnemyCount;
                 ++currentEnemyCount;
             }
 
             yield return spawnInterval;
         }
+    }
+
+    public static void ReturnEnemy(GameObject enemy, EnemyTypes type)
+    {
+        unusingEnemy[type].Add(enemy);
+        usingEnemy[type].Remove(enemy);
+        --currentEnemyCount;
     }
 }
