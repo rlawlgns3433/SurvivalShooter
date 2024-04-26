@@ -101,7 +101,7 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
+  MinDistance: 0.9999987
   MaxDistance: 500
   Pan2D: 0
   rolloffMode: 0
@@ -197,9 +197,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 1.2
-  m_Height: 1
-  m_Direction: 1
-  m_Center: {x: 0, y: 1, z: 0}
+  m_Height: 3
+  m_Direction: 2
+  m_Center: {x: 0, y: 1, z: 0.4}
 --- !u!195 &4757970497824931830
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -242,7 +242,7 @@ MonoBehaviour:
   targetLayerMask:
     serializedVersion: 2
     m_Bits: 64
-  types: 3
+  type: 3
   damage: 25
 --- !u!4 &1175167128356404517 stripped
 Transform:

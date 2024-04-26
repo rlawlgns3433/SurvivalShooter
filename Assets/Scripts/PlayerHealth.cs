@@ -12,6 +12,8 @@ public class PlayerHealth : LivingEntity
     private Animator playerAnimator; // 플레이어의 애니메이터
 
     private PlayerMovement playerMovement; // 플레이어 움직임 컴포넌트
+    private PlayerInput playerInput;
+    private PlayerShooter playerShooter;
 
     private void Awake()
     {
@@ -28,6 +30,16 @@ public class PlayerHealth : LivingEntity
         if (!TryGetComponent(out playerMovement))
         {
             playerMovement.enabled = false;
+            return;
+        }
+        if (!TryGetComponent(out playerInput))
+        {
+            playerInput.enabled = false;
+            return;
+        }
+        if (!TryGetComponent(out playerShooter))
+        {
+            playerShooter.enabled = false;
             return;
         }
     }
@@ -52,5 +64,21 @@ public class PlayerHealth : LivingEntity
         base.Die();
         playerAnimator.SetTrigger("Die");
         playerAudioPlayer.PlayOneShot(deathClip);
+        playerMovement.enabled = false;
+        playerInput.enabled = false;
+        playerShooter.enabled = false;
+    }
+
+    private void RestartLevel()
+    {
+        playerAnimator.SetTrigger("Respawn");
+        dead = false;
+        health = startingHealth;
+        healthSlider.value = health / startingHealth;
+        playerMovement.enabled = true;
+        playerInput.enabled = true;
+        playerShooter.enabled = true;
+
+        transform.position = new Vector3(0f, 0f, 0f);
     }
 }

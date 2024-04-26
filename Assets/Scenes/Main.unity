@@ -1179,6 +1179,10 @@ PrefabInstance:
       value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 5526774484556147310, guid: 290b3970b87ce2441a2997149707f474, type: 3}
+      propertyPath: hitClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 9922a12f34d0a084aab32de985459723, type: 3}
+    - target: {fileID: 5526774484556147310, guid: 290b3970b87ce2441a2997149707f474, type: 3}
       propertyPath: healthSlider
       value: 
       objectReference: {fileID: 2054816622}

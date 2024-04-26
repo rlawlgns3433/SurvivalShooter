@@ -12,6 +12,16 @@ public enum EnemyTypes
     None,
 }
 
+public enum EnemyStatus
+{ 
+    Idle,
+    Move,
+    Attack,
+    Death,
+    None,
+}
+
+
 public class Enemy : LivingEntity
 {
     public static readonly int TYPE_COUNT = 3;
@@ -28,6 +38,8 @@ public class Enemy : LivingEntity
     private Coroutine updatePathCoroutine = null;
 
     public EnemyTypes type = EnemyTypes.None;
+    public EnemyStatus status = EnemyStatus.Idle;
+
     public float damage = 10f;
     private float attackInterval = 0.2f;
     private float lastAttackTime;
@@ -39,10 +51,15 @@ public class Enemy : LivingEntity
             // 추적할 대상이 존재하고, 대상이 사망하지 않았다면 true
             if (targetEntity != null && !targetEntity.dead)
             {
+                status = EnemyStatus.Move;
                 return true;
             }
-            // 그렇지 않다면 false
-            return false;
+            else
+            {
+                status = EnemyStatus.Idle;
+                // 그렇지 않다면 false
+                return false;
+            }
         }
     }
 
@@ -69,12 +86,15 @@ public class Enemy : LivingEntity
 
     private void OnEnable()
     {
+        dead = false;
+        health = startingHealth;
+
         var colliders = GetComponents<Collider>();
         foreach(var collider in colliders)
         {
             collider.enabled = true;
         }
-
+        
         pathFinder.enabled = true;
         pathFinder.isStopped = false;
 
@@ -141,12 +161,6 @@ public class Enemy : LivingEntity
 
             yield return pathFindInterval;
         }
-
-        if(dead)
-        {
-            //Destroy(gameObject, 3f);
-            Invoke("AfterDie", 3f);
-        }
     }
 
     public override void Die()
@@ -157,15 +171,20 @@ public class Enemy : LivingEntity
         {
             collider.enabled = false;
         }
+        StopCoroutine(updatePathCoroutine);
+        updatePathCoroutine = null;
+
         pathFinder.isStopped = true;
         pathFinder.enabled = false;
+        targetEntity = null;
 
         enemyAnimator.SetTrigger("Die");
         enemyAudioPlayer.PlayOneShot(deathClip);
         --EnemySpawner.currentEnemyCount;
         EnemySpawner.usingEnemy.Remove(gameObject);
         GameManager.instance.AddScore((int)(startingHealth + damage));
-        
+
+        Invoke("AfterDie", 3f);
     }
 
     public override void OnDamage(float damage, Vector3 hitPoint, Vector3 hitNormal)
@@ -188,23 +207,26 @@ public class Enemy : LivingEntity
         if (dead)
             return;
 
-        if (Time.time < lastAttackTime + attackInterval)
+        if (status == EnemyStatus.Attack)
             return;
 
-        var livingEntity = collision.gameObject.GetComponent<LivingEntity>();
-        if (livingEntity != null && !livingEntity.dead && livingEntity == targetEntity)
+        if (Time.time > lastAttackTime + attackInterval)
         {
-            var pos = transform.position;
-            pos.y += 1f;
-            var hitPoint = collision.contacts[0].point;
-            var hitNormal = pos - collision.contacts[0].point;
-            livingEntity.OnDamage(damage, hitPoint, hitNormal.normalized);
-            lastAttackTime = Time.time;
+            var livingEntity = collision.gameObject.GetComponent<LivingEntity>();
+            if (livingEntity != null && !livingEntity.dead && livingEntity == targetEntity)
+            {
+                var pos = transform.position;
+                pos.y += 1f;
+                var hitPoint = collision.contacts[0].point;
+                var hitNormal = pos - collision.contacts[0].point;
+                livingEntity.OnDamage(damage, hitPoint, hitNormal.normalized);
+                lastAttackTime = Time.time;
+                status = EnemyStatus.Attack;
+            }
         }
     }
     private void AfterDie()
     {
-        StopCoroutine(updatePathCoroutine);
         gameObject.SetActive(false);
         EnemySpawner.unusingEnemy.Add(gameObject);
         EnemySpawner.usingEnemy.Remove(gameObject);

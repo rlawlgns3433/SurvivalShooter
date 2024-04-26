@@ -7,7 +7,7 @@ public class CameraMove : MonoBehaviour
 {
     public Transform target;
     private Vector3 offset = Vector3.zero;
-    private float speed = 10f;
+    private float speed = 15f;
 
     private void Start()
     {
@@ -16,6 +16,6 @@ public class CameraMove : MonoBehaviour
 
     private void LateUpdate()
     {
-        transform.position = Vector3.MoveTowards(transform.position, target.position - offset, speed * Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position, target.position - offset, speed * Time.deltaTime);
     }
 }

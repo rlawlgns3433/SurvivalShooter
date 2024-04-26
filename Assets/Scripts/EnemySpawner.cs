@@ -25,6 +25,8 @@ public class EnemySpawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (GameManager.instance.isGameover) return;
+
         if (currentEnemyCount <= 0)
         {
             if (createEnemyCoroutine != null)
@@ -46,6 +48,11 @@ public class EnemySpawner : MonoBehaviour
     {
         while (spawnedEnemyCount < wave * 20)
         {
+            if (GameManager.instance.isGameover)
+            {
+                StopCoroutine(createEnemyCoroutine);
+            }
+
             var spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)].transform;
             int type = Random.Range(0, Enemy.TYPE_COUNT);
             bool find = false;
