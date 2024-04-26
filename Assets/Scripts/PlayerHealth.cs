@@ -43,6 +43,7 @@ public class PlayerHealth : LivingEntity
     public override void OnDamage(float damage, Vector3 hitPoint, Vector3 hitNormal)
     {
         base.OnDamage(damage, hitPoint, hitNormal);
+        healthSlider.value = health / startingHealth;
         playerAudioPlayer.PlayOneShot(hitClip);
     }
 

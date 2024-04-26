@@ -1,4 +1,3 @@
-using Cinemachine;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
@@ -23,7 +22,6 @@ public class GameManager : MonoBehaviour
     }
 
     private static GameManager m_instance; // 싱글톤이 할당될 static 변수
-    public CinemachineVirtualCamera playerCamera;
 
     public int Score { get; set; } = 0; // 현재 게임 점수
     public bool isGameover { get; private set; } // 게임 오버 상태
@@ -84,6 +82,6 @@ public class GameManager : MonoBehaviour
         // 게임 오버 상태를 참으로 변경
         isGameover = true;
         // 게임 오버 UI를 활성화
-        UIManager.instance.SetActiveGameoverUI(true);
+        //UIManager.instance.SetActiveGameoverUI(true);
     }
 }
