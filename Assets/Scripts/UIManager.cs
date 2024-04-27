@@ -28,8 +28,6 @@ public class UIManager : MonoBehaviour
     public Slider musicSlider;
     public Slider effectSlider;
 
-
-
     // 점수 텍스트 갱신
     public void UpdateScoreText(int newScore)
     {

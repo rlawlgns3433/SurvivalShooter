@@ -34,6 +34,10 @@ public class GameManager : MonoBehaviour
     public AudioSource bgmPlayer;
     public AudioClip backgroundMusic;
 
+    private float bgmVolume;
+    private float effectVolume;
+    private bool isAllSoundPlaying = true;
+
     private void Awake()
     {
         // 씬에 싱글톤 오브젝트가 된 다른 GameManager 오브젝트가 있다면
@@ -66,6 +70,7 @@ public class GameManager : MonoBehaviour
         //UIManager.instance.effectSlider.onValueChanged.AddListener(SetEffectVolume);
 
         bgmPlayer.clip = backgroundMusic;
+        bgmPlayer.loop = true;
         bgmPlayer.Play();
     }
 
@@ -123,4 +128,24 @@ public class GameManager : MonoBehaviour
     //    effectAudioMixer.SetFloat("Enemies", Mathf.Log10(volume) * 20);
     //    effectAudioMixer.SetFloat("Gunshots", Mathf.Log10(volume) * 20);
     //}
+
+    public void AllSound()
+    {
+        AudioSource[] effects = FindObjectsOfType<AudioSource>();
+        if (isAllSoundPlaying)
+        {
+            effectVolume = UIManager.instance.effectSlider.value;
+            bgmVolume = UIManager.instance.musicSlider.value;
+
+            UIManager.instance.effectSlider.value = 0;
+            UIManager.instance.musicSlider.value = 0;
+            isAllSoundPlaying = !isAllSoundPlaying;
+        }
+        else
+        {
+            UIManager.instance.effectSlider.value = effectVolume;
+            UIManager.instance.musicSlider.value = bgmVolume;
+            isAllSoundPlaying = !isAllSoundPlaying;
+        }
+    }
 }
